@@ -1,0 +1,90 @@
+---
+title: "A new approch to the Accelerometers’ Data
+Classification of Body Postures and Movements"
+author: 
+- Bijan Fallah^[info@bijan-fallah.com]
+date: "15.06.2016"
+
+output: html_document
+---
+## Abstract
+
+In this document, I present a new approach to predict the Human Activity Recognition (HAR). 
+This research is an improvement of the study presented by [Ugulino
+ et al., 2012](http://groupware.les.inf.puc-rio.br/public/papers/2012.Ugulino.WearableComputing.HAR.Classifier.RIBBON.pdf). Using two different models, I have predicted the same activities for the testing data. 
+
+### HAR Data 
+
+The HAR dataset is downloaded from <http://groupware.les.inf.puc-rio.br/har>. Prior to fitting the model, I check the data for shortcommings or bad structures (near zero variances). The rest of the variables (predictors) will be feeded into the models. 
+
+```{r, cache=TRUE, message=FALSE}
+rm(list=ls(all=TRUE)) # deleting the workspace
+library(RCurl)
+# Training dataset:
+URL1 <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+x1 <- getURL(URL1)
+# Testing dataset:
+URL2 <- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+x2 <- getURL(URL2)
+library(lubridate)
+library(caret)
+# exluce all NA , Inf or empty colomns of the data:
+training = read.csv(textConnection(x1),na.strings=c("NA", "#DIV/0!",""))
+testing = read.csv(textConnection(x2),na.strings=c("NA", "#DIV/0!", ""))
+# explority 
+sum(is.na(training))
+str(training)
+#library(plyr)
+bad <- sapply(training, function(x) sum(is.na(x))>3000)
+#exlcude colomns with too many NaNs
+training2 <- training[,!bad]
+bad <- sapply(testing, function(x) sum(is.na(x))>10)# exlcude colomns with too many NaNs
+testing <- testing[,!bad]
+train_0 <- nearZeroVar(training2,saveMetrics = T)# exclude near zero variances
+training2 <- training2[,train_0$nzv == FALSE]
+training2 <- training2[,-c(1,2,3,4,5)]# exclude the id, names, dates, etc...
+library(adabag)
+library(rpart)
+set.seed(3465)
+# seperate the data into validation(30%) and training(70%)
+trainset <- createDataPartition(training2$classe, p = 0.7, list = FALSE)
+training <- training2[trainset, ]
+validation <- training2[-trainset, ]
+```
+
+As can be seen from the code chunck above, the predictors with too many NaNs or Infs are excluded as well as names and times or character variables. The next step would be to fit models to the remaining predictors. 
+
+### Results and model fitting 
+
+Here, I use two Machine Learning (ML) approaches: Adaptive Boosting (AdaBoost) [Yoav Freund and Robert Schapire,1996](http://cseweb.ucsd.edu/~yfreund/papers/boostingexperiments.pdf) and Random Forest (RF) [Tin Kam, 1995](http://ect.bell-labs.com/who/tkh/publications/papers/odt.pdf). In order to speed up the RF approach, I splitted the calculation into 5 stages each containing 30 tress (using the R's foreach library).
+
+```{r, echo=TRUE, cache=TRUE}
+set.seed(3465)
+ada_fit <- boosting(classe~., training, boos=TRUE, mfinal=30)# adaptive boosting with 30 trees
+library(foreach) # for a kind of parallelization in random forest
+library(randomForest)
+rfp_fit <- foreach(ntree=rep(30,5), .combine=combine, .packages='randomForest') %dopar% randomForest(classe~., data= training, ntree=ntree)
+per_ada_train <- predict(ada_fit, training)
+per_ada_valid <- predict(ada_fit, validation)
+
+per_rfp_train <- predict(rfp_fit, training)
+per_rfp_valid <- predict(rfp_fit, validation)
+# confussion for Random Forest:
+table(per_rfp_valid, validation$classe)
+# confussion for AdaBoost:
+per_ada_valid$confusion
+```
+
+### Conclusions
+
+The results from both models are similar for the test dataset. However, RF performs slightly better than AdaBoost for the validation dataset. 
+
+```{r, echo=TRUE, cache=TRUE}
+# prediction from Random Forest:
+as.character(predict(rfp_fit, testing))
+        
+# prediction from AdaBoost:
+predict(ada_fit, testing)$class
+```
+
+
