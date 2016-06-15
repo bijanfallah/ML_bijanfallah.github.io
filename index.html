@@ -1,0 +1,382 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="chrome=1">
+    <title>ML_bijanfallah.GitHub.io by bijanfallah</title>
+
+    <link rel="stylesheet" href="stylesheets/styles.css">
+    <link rel="stylesheet" href="stylesheets/github-dark.css">
+    <script src="javascripts/scale.fix.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+
+    <!--[if lt IE 9]>
+    <script src="//html5shiv.googlecode.com/svn/trunk/html5.js"></script>
+    <![endif]-->
+  </head>
+  <body>
+    <div class="wrapper">
+      <header class="without-description">
+        <h1>ML_bijanfallah.GitHub.io</h1>
+        <p></p>
+        <p class="view"><a href="https://github.com/bijanfallah/ML_bijanfallah.github.io">View the Project on GitHub <small>bijanfallah/ML_bijanfallah.github.io</small></a></p>
+        <ul>
+          <li><a href="https://github.com/bijanfallah/ML_bijanfallah.github.io/zipball/master">Download <strong>ZIP File</strong></a></li>
+          <li><a href="https://github.com/bijanfallah/ML_bijanfallah.github.io/tarball/master">Download <strong>TAR Ball</strong></a></li>
+          <li><a href="https://github.com/bijanfallah/ML_bijanfallah.github.io">View On <strong>GitHub</strong></a></li>
+        </ul>
+      </header>
+      <section>
+        <p>&lt;!DOCTYPE html&gt;</p>
+
+<p></p>
+
+<p></p>
+
+<p>
+
+</p>
+
+<p></p>
+
+<p></p>A new approch to the Accelerometers’ Data Classification of Body Postures and Movements
+
+
+
+<p>
+</p>
+
+
+
+
+
+
+
+code{white-space: pre;}
+
+<p></p>
+
+
+
+
+  pre:not([class]) {
+    background-color: white;
+  }
+
+
+
+
+
+h1 {
+  font-size: 34px;
+}
+h1.title {
+  font-size: 38px;
+}
+h2 {
+  font-size: 30px;
+}
+h3 {
+  font-size: 24px;
+}
+h4 {
+  font-size: 18px;
+}
+h5 {
+  font-size: 16px;
+}
+h6 {
+  font-size: 12px;
+}
+.table th:not([align]) {
+  text-align: left;
+}
+
+
+<p></p>
+
+<p></p>
+
+
+.main-container {
+  max-width: 940px;
+  margin-left: auto;
+  margin-right: auto;
+}
+code {
+  color: inherit;
+  background-color: rgba(0, 0, 0, 0.04);
+}
+img {
+  max-width:100%;
+  height: auto;
+}
+.tabbed-pane {
+  padding-top: 12px;
+}
+button.code-folding-btn:focus {
+  outline: none;
+}
+
+
+<div>
+
+
+
+
+
+
+
+
+
+
+
+
+<div id="header">
+
+
+
+<h1>
+<a id="a-new-approch-to-the-accelerometers-data-classification-of-body-postures-and-movements" class="anchor" href="#a-new-approch-to-the-accelerometers-data-classification-of-body-postures-and-movements" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>A new approch to the Accelerometers’ Data Classification of Body Postures and Movements</h1>
+<h4>
+<a id="bijan-fallah1" class="anchor" href="#bijan-fallah1" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><em>Bijan Fallah<a href="#fn1" id="fnref1"><sup>1</sup></a></em>
+</h4>
+<h4>
+<a id="15062016" class="anchor" href="#15062016" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a><em>15.06.2016</em>
+</h4>
+
+</div>
+
+<div id="abstract">
+<h2>
+<a id="abstract" class="anchor" href="#abstract" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Abstract</h2>
+<p>In this document, I present a new approach to predict the Human Activity Recognition (HAR). This research is an improvement of the study presented by <a href="http://groupware.les.inf.puc-rio.br/public/papers/2012.Ugulino.WearableComputing.HAR.Classifier.RIBBON.pdf">Ugulino et al., 2012</a>. Using two different models, I have predicted the same activities for the testing data.</p>
+<div id="har-data">
+<h3>
+<a id="har-data" class="anchor" href="#har-data" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>HAR Data</h3>
+<p>The HAR dataset is downloaded from <a href="http://groupware.les.inf.puc-rio.br/har">http://groupware.les.inf.puc-rio.br/har</a>. Prior to fitting the model, I check the data for shortcommings or bad structures (near zero variances). The rest of the variables (predictors) will be feeded into the models.</p>
+<pre><code>rm(list=ls(all=TRUE)) # deleting the workspace
+library(RCurl)
+# Training dataset:
+URL1 &lt;- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-training.csv"
+x1 &lt;- getURL(URL1)
+# Testing dataset:
+URL2 &lt;- "https://d396qusza40orc.cloudfront.net/predmachlearn/pml-testing.csv"
+x2 &lt;- getURL(URL2)
+library(lubridate)
+library(caret)
+# exluce all NA , Inf or empty colomns of the data:
+training = read.csv(textConnection(x1),na.strings=c("NA", "#DIV/0!",""))
+testing = read.csv(textConnection(x2),na.strings=c("NA", "#DIV/0!", ""))
+# explority 
+sum(is.na(training))</code></pre>
+<pre><code>## [1] 1925102</code></pre>
+<pre><code>str(training)</code></pre>
+<pre><code>## 'data.frame':    19622 obs. of  160 variables:
+##  $ X                       : int  1 2 3 4 5 6 7 8 9 10 ...
+##  $ user_name               : Factor w/ 6 levels "adelmo","carlitos",..: 2 2 2 2 2 2 2 2 2 2 ...
+##  $ raw_timestamp_part_1    : int  1323084231 1323084231 1323084231 1323084232 1323084232 1323084232 1323084232 1323084232 1323084232 1323084232 ...
+##  $ raw_timestamp_part_2    : int  788290 808298 820366 120339 196328 304277 368296 440390 484323 484434 ...
+##  $ cvtd_timestamp          : Factor w/ 20 levels "02/12/2011 13:32",..: 9 9 9 9 9 9 9 9 9 9 ...
+##  $ new_window              : Factor w/ 2 levels "no","yes": 1 1 1 1 1 1 1 1 1 1 ...
+##  $ num_window              : int  11 11 11 12 12 12 12 12 12 12 ...
+##  $ roll_belt               : num  1.41 1.41 1.42 1.48 1.48 1.45 1.42 1.42 1.43 1.45 ...
+##  $ pitch_belt              : num  8.07 8.07 8.07 8.05 8.07 8.06 8.09 8.13 8.16 8.17 ...
+##  $ yaw_belt                : num  -94.4 -94.4 -94.4 -94.4 -94.4 -94.4 -94.4 -94.4 -94.4 -94.4 ...
+##  $ total_accel_belt        : int  3 3 3 3 3 3 3 3 3 3 ...
+##  $ kurtosis_roll_belt      : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ kurtosis_picth_belt     : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ kurtosis_yaw_belt       : logi  NA NA NA NA NA NA ...
+##  $ skewness_roll_belt      : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ skewness_roll_belt.1    : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ skewness_yaw_belt       : logi  NA NA NA NA NA NA ...
+##  $ max_roll_belt           : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ max_picth_belt          : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ max_yaw_belt            : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ min_roll_belt           : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ min_pitch_belt          : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ min_yaw_belt            : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ amplitude_roll_belt     : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ amplitude_pitch_belt    : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ amplitude_yaw_belt      : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ var_total_accel_belt    : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ avg_roll_belt           : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ stddev_roll_belt        : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ var_roll_belt           : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ avg_pitch_belt          : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ stddev_pitch_belt       : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ var_pitch_belt          : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ avg_yaw_belt            : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ stddev_yaw_belt         : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ var_yaw_belt            : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ gyros_belt_x            : num  0 0.02 0 0.02 0.02 0.02 0.02 0.02 0.02 0.03 ...
+##  $ gyros_belt_y            : num  0 0 0 0 0.02 0 0 0 0 0 ...
+##  $ gyros_belt_z            : num  -0.02 -0.02 -0.02 -0.03 -0.02 -0.02 -0.02 -0.02 -0.02 0 ...
+##  $ accel_belt_x            : int  -21 -22 -20 -22 -21 -21 -22 -22 -20 -21 ...
+##  $ accel_belt_y            : int  4 4 5 3 2 4 3 4 2 4 ...
+##  $ accel_belt_z            : int  22 22 23 21 24 21 21 21 24 22 ...
+##  $ magnet_belt_x           : int  -3 -7 -2 -6 -6 0 -4 -2 1 -3 ...
+##  $ magnet_belt_y           : int  599 608 600 604 600 603 599 603 602 609 ...
+##  $ magnet_belt_z           : int  -313 -311 -305 -310 -302 -312 -311 -313 -312 -308 ...
+##  $ roll_arm                : num  -128 -128 -128 -128 -128 -128 -128 -128 -128 -128 ...
+##  $ pitch_arm               : num  22.5 22.5 22.5 22.1 22.1 22 21.9 21.8 21.7 21.6 ...
+##  $ yaw_arm                 : num  -161 -161 -161 -161 -161 -161 -161 -161 -161 -161 ...
+##  $ total_accel_arm         : int  34 34 34 34 34 34 34 34 34 34 ...
+##  $ var_accel_arm           : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ avg_roll_arm            : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ stddev_roll_arm         : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ var_roll_arm            : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ avg_pitch_arm           : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ stddev_pitch_arm        : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ var_pitch_arm           : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ avg_yaw_arm             : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ stddev_yaw_arm          : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ var_yaw_arm             : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ gyros_arm_x             : num  0 0.02 0.02 0.02 0 0.02 0 0.02 0.02 0.02 ...
+##  $ gyros_arm_y             : num  0 -0.02 -0.02 -0.03 -0.03 -0.03 -0.03 -0.02 -0.03 -0.03 ...
+##  $ gyros_arm_z             : num  -0.02 -0.02 -0.02 0.02 0 0 0 0 -0.02 -0.02 ...
+##  $ accel_arm_x             : int  -288 -290 -289 -289 -289 -289 -289 -289 -288 -288 ...
+##  $ accel_arm_y             : int  109 110 110 111 111 111 111 111 109 110 ...
+##  $ accel_arm_z             : int  -123 -125 -126 -123 -123 -122 -125 -124 -122 -124 ...
+##  $ magnet_arm_x            : int  -368 -369 -368 -372 -374 -369 -373 -372 -369 -376 ...
+##  $ magnet_arm_y            : int  337 337 344 344 337 342 336 338 341 334 ...
+##  $ magnet_arm_z            : int  516 513 513 512 506 513 509 510 518 516 ...
+##  $ kurtosis_roll_arm       : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ kurtosis_picth_arm      : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ kurtosis_yaw_arm        : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ skewness_roll_arm       : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ skewness_pitch_arm      : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ skewness_yaw_arm        : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ max_roll_arm            : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ max_picth_arm           : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ max_yaw_arm             : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ min_roll_arm            : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ min_pitch_arm           : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ min_yaw_arm             : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ amplitude_roll_arm      : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ amplitude_pitch_arm     : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ amplitude_yaw_arm       : int  NA NA NA NA NA NA NA NA NA NA ...
+##  $ roll_dumbbell           : num  13.1 13.1 12.9 13.4 13.4 ...
+##  $ pitch_dumbbell          : num  -70.5 -70.6 -70.3 -70.4 -70.4 ...
+##  $ yaw_dumbbell            : num  -84.9 -84.7 -85.1 -84.9 -84.9 ...
+##  $ kurtosis_roll_dumbbell  : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ kurtosis_picth_dumbbell : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ kurtosis_yaw_dumbbell   : logi  NA NA NA NA NA NA ...
+##  $ skewness_roll_dumbbell  : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ skewness_pitch_dumbbell : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ skewness_yaw_dumbbell   : logi  NA NA NA NA NA NA ...
+##  $ max_roll_dumbbell       : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ max_picth_dumbbell      : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ max_yaw_dumbbell        : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ min_roll_dumbbell       : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ min_pitch_dumbbell      : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ min_yaw_dumbbell        : num  NA NA NA NA NA NA NA NA NA NA ...
+##  $ amplitude_roll_dumbbell : num  NA NA NA NA NA NA NA NA NA NA ...
+##   [list output truncated]</code></pre>
+<pre><code>#library(plyr)
+bad &lt;- sapply(training, function(x) sum(is.na(x))&gt;3000)
+#exlcude colomns with too many NaNs
+training2 &lt;- training[,!bad]
+bad &lt;- sapply(testing, function(x) sum(is.na(x))&gt;10)# exlcude colomns with too many NaNs
+testing &lt;- testing[,!bad]
+train_0 &lt;- nearZeroVar(training2,saveMetrics = T)# exclude near zero variances
+training2 &lt;- training2[,train_0$nzv == FALSE]
+training2 &lt;- training2[,-c(1,2,3,4,5)]# exclude the id, names, dates, etc...
+library(adabag)</code></pre>
+<pre><code>## Warning: package 'mlbench' was built under R version 3.2.1</code></pre>
+<pre><code>library(rpart)
+set.seed(3465)
+# seperate the data into validation(30%) and training(70%)
+trainset &lt;- createDataPartition(training2$classe, p = 0.7, list = FALSE)
+training &lt;- training2[trainset, ]
+validation &lt;- training2[-trainset, ]</code></pre>
+<p>As can be seen from the code chunck above, the predictors with too many NaNs or Infs are excluded as well as names and times or character variables. The next step would be to fit models to the remaining predictors.</p>
+</div>
+
+<div id="results-and-model-fitting">
+<h3>
+<a id="results-and-model-fitting" class="anchor" href="#results-and-model-fitting" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Results and model fitting</h3>
+<p>Here, I use two Machine Learning (ML) approaches: Adaptive Boosting (AdaBoost) <a href="http://cseweb.ucsd.edu/~yfreund/papers/boostingexperiments.pdf">Yoav Freund and Robert Schapire,1996</a> and Random Forest (RF) <a href="http://ect.bell-labs.com/who/tkh/publications/papers/odt.pdf">Tin Kam, 1995</a>. In order to speed up the RF approach, I splitted the calculation into 5 stages each containing 30 tress (using the R’s foreach library).</p>
+<pre><code>set.seed(3465)
+ada_fit &lt;- boosting(classe~., training, boos=TRUE, mfinal=30)# adaptive boosting with 30 trees
+library(foreach) # for a kind of parallelization in random forest
+library(randomForest)</code></pre>
+<pre><code>## randomForest 4.6-12</code></pre>
+<pre><code>## Type rfNews() to see new features/changes/bug fixes.</code></pre>
+<pre><code>## 
+## Attaching package: 'randomForest'</code></pre>
+<pre><code>## The following object is masked from 'package:ggplot2':
+## 
+##     margin</code></pre>
+<pre><code>rfp_fit &lt;- foreach(ntree=rep(30,5), .combine=combine, .packages='randomForest') %dopar% randomForest(classe~., data= training, ntree=ntree)</code></pre>
+<pre><code>## Warning: executing %dopar% sequentially: no parallel backend registered</code></pre>
+<pre><code>per_ada_train &lt;- predict(ada_fit, training)
+per_ada_valid &lt;- predict(ada_fit, validation)
+
+per_rfp_train &lt;- predict(rfp_fit, training)
+per_rfp_valid &lt;- predict(rfp_fit, validation)
+# confussion for Random Forest:
+table(per_rfp_valid, validation$classe)</code></pre>
+<pre><code>##              
+## per_rfp_valid    A    B    C    D    E
+##             A 1674    1    0    0    0
+##             B    0 1138    4    0    0
+##             C    0    0 1021    4    0
+##             D    0    0    1  960    3
+##             E    0    0    0    0 1079</code></pre>
+<pre><code># confussion for AdaBoost:
+per_ada_valid$confusion</code></pre>
+<pre><code>##                Observed Class
+## Predicted Class    A    B    C    D    E
+##               A 1666   18    0    0    0
+##               B    4 1107   11    5    4
+##               C    0   13 1015   13    1
+##               D    2    0    0  942    5
+##               E    2    1    0    4 1072</code></pre>
+</div>
+
+<div id="conclusions">
+<h3>
+<a id="conclusions" class="anchor" href="#conclusions" aria-hidden="true"><span aria-hidden="true" class="octicon octicon-link"></span></a>Conclusions</h3>
+<p>The results from both models are similar for the test dataset. However, RF performs slightly better than AdaBoost for the validation dataset.</p>
+<pre><code># prediction from Random Forest:
+as.character(predict(rfp_fit, testing))</code></pre>
+<pre><code>##  [1] "B" "A" "B" "A" "A" "E" "D" "B" "A" "A" "B" "C" "B" "A" "E" "E" "A"
+## [18] "B" "B" "B"</code></pre>
+<pre><code># prediction from AdaBoost:
+predict(ada_fit, testing)$class</code></pre>
+<pre><code>##  [1] "B" "A" "B" "A" "A" "E" "D" "B" "A" "A" "B" "C" "B" "A" "E" "E" "A"
+## [18] "B" "B" "B"</code></pre>
+</div>
+
+<p></p>
+</div>
+
+<div>
+<hr>
+<ol>
+<li id="fn1"><p><a href="mailto:info@bijan-fallah.com">info@bijan-fallah.com</a><a href="#fnref1">↩</a></p></li>
+</ol>
+</div>
+
+<p></p>
+</div>
+
+
+
+
+
+
+
+<p>
+</p>
+      </section>
+    </div>
+    <footer>
+      <p>Project maintained by <a href="https://github.com/bijanfallah">bijanfallah</a></p>
+      <p>Hosted on GitHub Pages &mdash; Theme by <a href="https://github.com/orderedlist">orderedlist</a></p>
+    </footer>
+    <!--[if !IE]><script>fixScale(document);</script><![endif]-->
+    
+  </body>
+</html>
